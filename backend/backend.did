@@ -1,0 +1,7 @@
+service : {
+  getLifeTotals: () -> (vec nat) query;
+  getPlayerNames: () -> (vec opt text) query;
+  resetLifeTotals: () -> ();
+  setPlayerName: (nat, opt text) -> ();
+  updateLifeTotal: (nat, int) -> ();
+}

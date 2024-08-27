@@ -32,6 +32,23 @@ body {
   font-weight: bold;
 }
 
+.counter {
+  font-size: 1.5rem;
+  margin: 8px 0;
+}
+
+.commander-damage {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.commander-damage-item {
+  margin: 4px;
+  text-align: center;
+}
+
 .attribution {
   position: fixed;
   bottom: 10px;

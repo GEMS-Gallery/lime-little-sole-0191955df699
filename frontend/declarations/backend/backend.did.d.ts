@@ -3,11 +3,15 @@ import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 
 export interface _SERVICE {
-  'getLifeTotals' : ActorMethod<[], Array<bigint>>,
-  'getPlayerNames' : ActorMethod<[], Array<[] | [string]>>,
-  'resetLifeTotals' : ActorMethod<[], undefined>,
+  'getPlayersState' : ActorMethod<
+    [],
+    Array<[bigint, [] | [string], bigint, bigint, Array<bigint>]>
+  >,
+  'resetCounters' : ActorMethod<[], undefined>,
   'setPlayerName' : ActorMethod<[bigint, [] | [string]], undefined>,
+  'updateCommanderDamage' : ActorMethod<[bigint, bigint, bigint], undefined>,
   'updateLifeTotal' : ActorMethod<[bigint, bigint], undefined>,
+  'updatePoisonCounters' : ActorMethod<[bigint, bigint], undefined>,
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

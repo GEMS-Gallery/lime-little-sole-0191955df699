@@ -1,7 +1,14 @@
 service : {
-  getLifeTotals: () -> (vec nat) query;
-  getPlayerNames: () -> (vec opt text) query;
-  resetLifeTotals: () -> ();
+  getPlayersState: () -> (vec record {
+                                nat;
+                                opt text;
+                                nat;
+                                nat;
+                                vec nat;
+                              }) query;
+  resetCounters: () -> ();
   setPlayerName: (nat, opt text) -> ();
+  updateCommanderDamage: (nat, nat, int) -> ();
   updateLifeTotal: (nat, int) -> ();
+  updatePoisonCounters: (nat, int) -> ();
 }

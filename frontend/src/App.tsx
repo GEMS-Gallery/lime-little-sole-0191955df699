@@ -10,6 +10,8 @@ interface Player {
   id: number;
   name: string;
   lifeTotal: number;
+  poisonCounters: number;
+  commanderDamage: number[];
 }
 
 const App: React.FC = () => {
@@ -23,14 +25,13 @@ const App: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const [lifeTotals, playerNames] = await Promise.all([
-        backend.getLifeTotals(),
-        backend.getPlayerNames()
-      ]);
-      setPlayers(lifeTotals.map((life, index) => ({
-        id: index,
-        name: playerNames[index] || `Player ${index + 1}`,
-        lifeTotal: Number(life)
+      const playersState = await backend.getPlayersState();
+      setPlayers(playersState.map(([id, name, lifeTotal, poisonCounters, commanderDamage]) => ({
+        id,
+        name: name || `Player ${id + 1}`,
+        lifeTotal: Number(lifeTotal),
+        poisonCounters: Number(poisonCounters),
+        commanderDamage: commanderDamage.map(Number)
       })));
       setLoading(false);
     } catch (error) {
@@ -51,13 +52,37 @@ const App: React.FC = () => {
     }
   };
 
-  const resetLifeTotals = async () => {
+  const updatePoisonCounters = async (playerId: number, change: number) => {
     setLoading(true);
     try {
-      await backend.resetLifeTotals();
+      await backend.updatePoisonCounters(playerId, BigInt(change));
       await fetchData();
     } catch (error) {
-      console.error('Error resetting life totals:', error);
+      console.error('Error updating poison counters:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateCommanderDamage = async (playerId: number, fromPlayerId: number, change: number) => {
+    setLoading(true);
+    try {
+      await backend.updateCommanderDamage(playerId, fromPlayerId, BigInt(change));
+      await fetchData();
+    } catch (error) {
+      console.error('Error updating commander damage:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetCounters = async () => {
+    setLoading(true);
+    try {
+      await backend.resetCounters();
+      await fetchData();
+    } catch (error) {
+      console.error('Error resetting counters:', error);
     } finally {
       setLoading(false);
     }
@@ -135,6 +160,51 @@ const App: React.FC = () => {
                     </Button>
                   </Grid>
                 </Grid>
+                <Typography variant="h6" className="counter">
+                  Poison Counters: {player.poisonCounters}
+                </Typography>
+                <Grid container spacing={1} justifyContent="center">
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => updatePoisonCounters(player.id, -1)}
+                      startIcon={<RemoveIcon />}
+                    >
+                      -1
+                    </Button>
+                  </Grid>
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => updatePoisonCounters(player.id, 1)}
+                      startIcon={<AddIcon />}
+                    >
+                      +1
+                    </Button>
+                  </Grid>
+                </Grid>
+                <Typography variant="h6" className="counter">
+                  Commander Damage
+                </Typography>
+                <div className="commander-damage">
+                  {player.commanderDamage.map((damage, index) => (
+                    index !== player.id && (
+                      <div key={index} className="commander-damage-item">
+                        <Typography variant="body2">From P{index + 1}</Typography>
+                        <Typography variant="body1">{damage}</Typography>
+                        <Button
+                          size="small"
+                          onClick={() => updateCommanderDamage(player.id, index, 1)}
+                          startIcon={<AddIcon />}
+                        >
+                          +1
+                        </Button>
+                      </div>
+                    )
+                  ))}
+                </div>
               </div>
             </Grid>
           ))}
@@ -149,10 +219,10 @@ const App: React.FC = () => {
             <Button
               variant="contained"
               color="error"
-              onClick={resetLifeTotals}
+              onClick={resetCounters}
               startIcon={<RefreshIcon />}
             >
-              Reset Life Totals
+              Reset All Counters
             </Button>
           </Grid>
         </Grid>
